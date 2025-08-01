@@ -142,13 +142,13 @@ class BaseApiControllerTest extends TestCase
                 return [];
             }
 
-            public function testSuccessResponse()
+            public function test_success_response()
             {
                 return $this->successResponse(['id' => 1], 'Test success', 200);
             }
         };
 
-        $response = $controller->testSuccessResponse();
+        $response = $controller->test_success_response();
         $data = $response->getData(true);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -191,13 +191,13 @@ class BaseApiControllerTest extends TestCase
                 return [];
             }
 
-            public function testErrorResponse()
+            public function test_error_response()
             {
                 return $this->errorResponse('Test error', 400);
             }
         };
 
-        $response = $controller->testErrorResponse();
+        $response = $controller->test_error_response();
         $data = $response->getData(true);
 
         $this->assertEquals(400, $response->getStatusCode());
