@@ -52,7 +52,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+        composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --ignore-platform-req=ext-mongodb
         
     - name: Verify Laravel MongoDB package
       run: |
