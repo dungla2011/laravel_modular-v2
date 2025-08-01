@@ -7,6 +7,39 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Laravel 2025 - Modular MongoDB Architecture
+
+This is a Laravel 11 application with modular architecture using MongoDB as the database. The application features:
+
+- **Modular Architecture**: Clean separation of concerns with independent modules
+- **MongoDB Integration**: Using Laravel MongoDB package for NoSQL operations
+- **CI/CD Pipeline**: Complete GitHub Actions workflow for automated testing and deployment
+- **Code Quality**: Automated code style checking with Laravel Pint and static analysis with PHPStan
+- **Health Monitoring**: Comprehensive health check endpoints
+- **Docker Support**: Multi-stage Docker builds for development and production
+
+## Health Check Endpoints
+
+The application provides monitoring endpoints:
+
+- `/health` - Complete health status with all checks
+- `/health/live` - Liveness probe (basic app status)  
+- `/health/ready` - Readiness probe (dependencies check)
+
+### Testing Health Endpoints
+
+**Linux/Mac (bash):**
+```bash
+curl -s http://127.0.0.1:8000/health | jq '.'
+```
+
+**Windows (PowerShell):**
+```powershell
+# ❌ KHÔNG SỬ DỤNG (bị lỗi): curl -s http://127.0.0.1:8000/health | ConvertFrom-Json | ConvertTo-Json -Depth 3
+# ✅ SỬ DỤNG lệnh này thay thế:
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/health" | ConvertTo-Json -Depth 3
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

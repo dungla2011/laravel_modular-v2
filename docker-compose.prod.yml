@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: laravel_app_prod
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - storage_data:/var/www/html/storage
+      - ./docker/php/production.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    networks:
+      - laravel
+    depends_on:
+      - mongodb
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/ssl/:/etc/nginx/ssl/:ro
+      - nginx_cache:/var/cache/nginx
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+  mongodb:
+    image: mongo:7.0
+    container_name: laravel_mongodb_prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - laravel
+
+  redis:
+    image: redis:7-alpine
+    container_name: laravel_redis_prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - laravel
+
+  backup:
+    image: mongo:7.0
+    container_name: laravel_backup
+    restart: "no"
+    volumes:
+      - mongodb_data:/data/db:ro
+      - backup_data:/backup
+    networks:
+      - laravel
+    depends_on:
+      - mongodb
+    command: >
+      sh -c "
+        while true; do
+          mongodump --host mongodb:27017 --username ${DB_USERNAME} --password ${DB_PASSWORD} --out /backup/$(date +%Y%m%d_%H%M%S)
+          find /backup -type d -name '20*' -mtime +7 -exec rm -rf {} +
+          sleep 86400
+        done
+      "
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  storage_data:
+    driver: local
+  backup_data:
+    driver: local
+  nginx_cache:
+    driver: local

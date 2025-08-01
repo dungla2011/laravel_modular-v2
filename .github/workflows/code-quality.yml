@@ -1,0 +1,178 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-style:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        tools: composer
+        
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      
+    - name: Run Laravel Pint (Code Style)
+      run: |
+        if [ ! -f vendor/bin/pint ]; then
+          composer require laravel/pint --dev
+        fi
+        vendor/bin/pint --test
+        
+    - name: Check for uncommitted changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Code style issues found. Please run 'vendor/bin/pint' and commit the changes."
+          git diff
+          exit 1
+        fi
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        tools: composer
+        
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      
+    - name: Setup PHPStan config
+      run: |
+        if [ ! -f phpstan.neon ]; then
+          cat > phpstan.neon << 'EOF'
+        parameters:
+            level: 5
+            paths:
+                - app
+                - modules
+            excludePaths:
+                - modules/*/Tests/*
+                - vendor
+            checkMissingIterableValueType: false
+            checkGenericClassInNonGenericObjectType: false
+        EOF
+        fi
+        
+    - name: Install PHPStan
+      run: |
+        if [ ! -f vendor/bin/phpstan ]; then
+          composer require phpstan/phpstan --dev
+        fi
+        
+    - name: Run PHPStan
+      run: vendor/bin/phpstan analyse --memory-limit=2G
+
+  module-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+          
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        extensions: mongodb
+        
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      
+    - name: Copy environment file
+      run: cp .env.example .env
+      
+    - name: Generate application key
+      run: php artisan key:generate
+      
+    - name: Setup test environment
+      run: |
+        echo "DB_CONNECTION=mongodb" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=27017" >> .env
+        echo "DB_DATABASE=laravel_test" >> .env
+        echo "APP_ENV=testing" >> .env
+        
+    - name: Wait for MongoDB
+      run: |
+        until mongosh --host 127.0.0.1:27017 --eval "print('ready')"; do
+          sleep 2
+        done
+        
+    - name: Run Base Module Tests
+      run: |
+        if [ -d "modules/Base/Tests" ]; then
+          php artisan test modules/Base/Tests --parallel
+        else
+          echo "No Base module tests found"
+        fi
+        
+    - name: Run other module tests
+      run: |
+        for module in modules/*/Tests; do
+          if [ -d "$module" ] && [[ "$module" != *"/Base/Tests" ]]; then
+            echo "Running tests for $module"
+            php artisan test "$module" --parallel
+          fi
+        done
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      
+    - name: Check for outdated packages
+      run: composer outdated --direct
+      
+    - name: Security audit
+      run: composer audit
+      
+    - name: Check platform requirements
+      run: composer check-platform-reqs

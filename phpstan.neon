@@ -1,0 +1,18 @@
+parameters:
+    level: 5
+    paths:
+        - app
+        - modules
+    excludePaths:
+        - modules/*/Tests/*
+        - vendor
+        - bootstrap/cache
+        - storage
+    ignoreErrors:
+        - '#Call to an undefined method Illuminate\\Database\\Connection::getMongoClient\(\)#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Model::(find|findOrFail|create|paginate|count|where|whereIn)\(\)#'
+        - '#Access to an undefined property Modules\\Base\\Abstracts\\BaseResource::\$(_id|created_at|updated_at)#'
+        - '#Trait .* is used zero times and is not analysed#'
+    bootstrapFiles:
+        - vendor/autoload.php
+    treatPhpDocTypesAsCertain: false

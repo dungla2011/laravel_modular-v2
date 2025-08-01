@@ -2,10 +2,10 @@
 
 namespace Modules\Base\Abstracts;
 
-use Modules\Base\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\Base\Contracts\RepositoryInterface;
 
 abstract class BaseRepository implements RepositoryInterface
 {
@@ -40,12 +40,14 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $record = $this->findOrFail($id);
         $record->update($data);
+
         return $record->fresh();
     }
 
     public function delete(string $id): bool
     {
         $record = $this->findOrFail($id);
+
         return $record->delete();
     }
 
@@ -57,22 +59,22 @@ abstract class BaseRepository implements RepositoryInterface
     public function findBy(array $criteria): Collection
     {
         $query = $this->model->newQuery();
-        
+
         foreach ($criteria as $field => $value) {
             $query->where($field, $value);
         }
-        
+
         return $query->get();
     }
 
     public function findOneBy(array $criteria): ?Model
     {
         $query = $this->model->newQuery();
-        
+
         foreach ($criteria as $field => $value) {
             $query->where($field, $value);
         }
-        
+
         return $query->first();
     }
 
@@ -87,7 +89,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Apply filters to query
+     * Apply filters to query.
      */
     protected function applyFilters($query, array $filters)
     {
@@ -100,15 +102,51 @@ abstract class BaseRepository implements RepositoryInterface
                 }
             }
         }
-        
+
         return $query;
     }
 
     /**
-     * Apply sorting to query
+     * Apply sorting to query.
      */
     protected function applySorting($query, string $sortField = 'created_at', string $sortDirection = 'desc')
     {
         return $query->orderBy($sortField, $sortDirection);
+    }
+
+    /**
+     * Get paginated records with filters and sorting.
+     */
+    public function getPaginatedWithFilters(int $perPage = 15, array $filters = [], string $sortField = 'created_at', string $sortDirection = 'desc'): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery();
+
+        $query = $this->applyFilters($query, $filters);
+        $query = $this->applySorting($query, $sortField, $sortDirection);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Bulk delete records.
+     */
+    public function bulkDelete(array $ids): int
+    {
+        return $this->model->whereIn('_id', $ids)->delete();
+    }
+
+    /**
+     * Toggle status of a record.
+     */
+    public function toggleStatus(string $id): ?Model
+    {
+        $record = $this->findOrFail($id);
+
+        if (method_exists($record, 'isActive')) {
+            $newStatus = $record->isActive() ? 'inactive' : 'active';
+            $record->update(['status' => $newStatus]);
+        }
+
+        return $record->fresh();
     }
 }

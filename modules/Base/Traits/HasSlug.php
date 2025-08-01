@@ -5,12 +5,12 @@ namespace Modules\Base\Traits;
 trait HasSlug
 {
     /**
-     * Boot the trait
+     * Boot the trait.
      */
     protected static function bootHasSlug()
     {
         static::creating(function ($model) {
-            if (empty($model->slug) && !empty($model->title)) {
+            if (empty($model->slug) && ! empty($model->title)) {
                 $model->slug = $model->generateSlug($model->title);
             }
         });
@@ -23,7 +23,7 @@ trait HasSlug
     }
 
     /**
-     * Generate slug from title
+     * Generate slug from title.
      */
     public function generateSlug(string $title): string
     {
@@ -40,23 +40,23 @@ trait HasSlug
     }
 
     /**
-     * Convert string to slug
+     * Convert string to slug.
      */
     protected function slugify(string $text): string
     {
         // Convert Vietnamese characters
         $text = $this->removeVietnameseAccents($text);
-        
+
         // Convert to lowercase and replace spaces with hyphens
         $text = strtolower($text);
         $text = preg_replace('/[^a-z0-9\-]/', '', str_replace(' ', '-', $text));
         $text = preg_replace('/-+/', '-', $text);
-        
+
         return trim($text, '-');
     }
 
     /**
-     * Remove Vietnamese accents
+     * Remove Vietnamese accents.
      */
     protected function removeVietnameseAccents(string $str): string
     {
@@ -67,7 +67,7 @@ trait HasSlug
             'ò', 'ó', 'ọ', 'ỏ', 'õ', 'ô', 'ồ', 'ố', 'ộ', 'ổ', 'ỗ', 'ơ', 'ờ', 'ớ', 'ợ', 'ở', 'ỡ',
             'ù', 'ú', 'ụ', 'ủ', 'ũ', 'ư', 'ừ', 'ứ', 'ự', 'ử', 'ữ',
             'ỳ', 'ý', 'ỵ', 'ỷ', 'ỹ',
-            'đ'
+            'đ',
         ];
 
         $replacements = [
@@ -77,28 +77,28 @@ trait HasSlug
             'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o',
             'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u',
             'y', 'y', 'y', 'y', 'y',
-            'd'
+            'd',
         ];
 
         return str_replace($accents, $replacements, $str);
     }
 
     /**
-     * Check if slug exists
+     * Check if slug exists.
      */
     protected function slugExists(string $slug): bool
     {
         $query = static::where('slug', $slug);
-        
+
         if ($this->exists) {
             $query->where('_id', '!=', $this->_id);
         }
-        
+
         return $query->exists();
     }
 
     /**
-     * Find by slug
+     * Find by slug.
      */
     public static function findBySlug(string $slug)
     {
@@ -106,7 +106,7 @@ trait HasSlug
     }
 
     /**
-     * Get route key name
+     * Get route key name.
      */
     public function getRouteKeyName(): string
     {

@@ -5,21 +5,21 @@ namespace Modules\Base\Traits;
 trait HasStatus
 {
     /**
-     * Get all available statuses
+     * Get all available statuses.
      */
     public static function getStatuses(): array
     {
         return [
-            'active' => 'Active',
-            'inactive' => 'Inactive',
-            'pending' => 'Pending',
-            'draft' => 'Draft',
+            'active'    => 'Active',
+            'inactive'  => 'Inactive',
+            'pending'   => 'Pending',
+            'draft'     => 'Draft',
             'published' => 'Published',
         ];
     }
 
     /**
-     * Scope active records
+     * Scope active records.
      */
     public function scopeActive($query)
     {
@@ -27,7 +27,7 @@ trait HasStatus
     }
 
     /**
-     * Scope inactive records
+     * Scope inactive records.
      */
     public function scopeInactive($query)
     {
@@ -35,7 +35,7 @@ trait HasStatus
     }
 
     /**
-     * Scope pending records
+     * Scope pending records.
      */
     public function scopePending($query)
     {
@@ -43,7 +43,7 @@ trait HasStatus
     }
 
     /**
-     * Check if record is active
+     * Check if record is active.
      */
     public function isActive(): bool
     {
@@ -51,7 +51,7 @@ trait HasStatus
     }
 
     /**
-     * Check if record is inactive
+     * Check if record is inactive.
      */
     public function isInactive(): bool
     {
@@ -59,7 +59,7 @@ trait HasStatus
     }
 
     /**
-     * Set status to active
+     * Set status to active.
      */
     public function activate(): bool
     {
@@ -67,7 +67,7 @@ trait HasStatus
     }
 
     /**
-     * Set status to inactive
+     * Set status to inactive.
      */
     public function deactivate(): bool
     {

@@ -12,7 +12,7 @@ enum StatusEnum: string
     case DELETED = 'deleted';
 
     /**
-     * Get all values
+     * Get all values.
      */
     public static function values(): array
     {
@@ -20,32 +20,32 @@ enum StatusEnum: string
     }
 
     /**
-     * Get label for status
+     * Get label for status.
      */
     public function label(): string
     {
-        return match($this) {
-            self::ACTIVE => 'Hoạt động',
-            self::INACTIVE => 'Không hoạt động',
-            self::PENDING => 'Chờ duyệt',
-            self::DRAFT => 'Bản nháp',
+        return match ($this) {
+            self::ACTIVE    => 'Hoạt động',
+            self::INACTIVE  => 'Không hoạt động',
+            self::PENDING   => 'Chờ duyệt',
+            self::DRAFT     => 'Bản nháp',
             self::PUBLISHED => 'Đã xuất bản',
-            self::DELETED => 'Đã xóa',
+            self::DELETED   => 'Đã xóa',
         };
     }
 
     /**
-     * Get color for status
+     * Get color for status.
      */
     public function color(): string
     {
-        return match($this) {
-            self::ACTIVE => 'success',
-            self::INACTIVE => 'secondary',
-            self::PENDING => 'warning',
-            self::DRAFT => 'info',
+        return match ($this) {
+            self::ACTIVE    => 'success',
+            self::INACTIVE  => 'secondary',
+            self::PENDING   => 'warning',
+            self::DRAFT     => 'info',
             self::PUBLISHED => 'primary',
-            self::DELETED => 'danger',
+            self::DELETED   => 'danger',
         };
     }
 }

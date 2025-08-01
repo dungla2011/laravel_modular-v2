@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="../../../vendor/autoload.php"
+         colors="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         cacheDirectory="../../../.phpunit.cache"
+         backupGlobals="false">
+    <testsuites>
+        <testsuite name="Base Module Unit Tests">
+            <directory>./Unit</directory>
+        </testsuite>
+        <testsuite name="Base Module Feature Tests">
+            <directory>./Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">../</directory>
+        </include>
+        <exclude>
+            <directory>./</directory>
+            <directory>../Assets</directory>
+        </exclude>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="mongodb"/>
+        <env name="DB_DATABASE" value="laravel_test"/>
+    </php>
+</phpunit>

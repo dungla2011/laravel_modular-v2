@@ -26,3 +26,54 @@
 cd "path" ; php artisan serve
 cd "path" ; composer install
 ```
+
+## Module Architecture (DDD)
+
+### Base Module
+- **Abstracts**: BaseController, BaseModel, BaseRepository, BaseService
+- **Contracts**: RepositoryInterface, ServiceInterface
+- **Traits**: HasStatus, HasSlug
+- **Enums**: StatusEnum
+- **Exceptions**: ModuleException, ResourceNotFoundException
+
+### Module Structure
+```
+modules/
+├── Base/                    # Core module với interfaces & abstracts
+├── [ModuleName]/           # Các module nghiệp vụ
+│   ├── Controllers/        # Admin, API, Web controllers
+│   ├── Models/            # Domain models  
+│   ├── Repositories/      # Data access layer
+│   ├── Services/          # Business logic
+│   ├── Routes/            # web.php, admin.php, api.php
+│   ├── Views/             # Blade templates
+│   ├── Tests/             # Unit, Feature, Browser tests
+│   └── Database/          # Migrations, Seeders, Factories
+```
+
+### Route Structure
+- **Web**: `/modulename/*` (chỉ render views)
+- **Admin**: `/admin/modulename/*` (chỉ render admin views)  
+- **API Public**: `/api/modulename/*`
+- **API Admin**: `/api/admin/modulename/*`
+
+### API-First Architecture
+- **Frontend**: JavaScript/AJAX calls to API endpoints
+- **No form POST**: All CRUD operations via API
+- **Components**: BaseApiController, BaseResource, BaseRequest
+- **Helpers**: api-helper.js cho frontend
+- **Features**: 
+  - Bulk operations
+  - Status toggle
+  - Advanced filtering
+  - Pagination
+  - Error handling
+
+### Testing Structure
+- **Unit Tests**: `modules/[Module]/tests/Unit/`
+- **Feature Tests**: `modules/[Module]/tests/Feature/`
+- **Config**: `modules/[Module]/tests/phpunit.xml`
+- **Commands**: 
+  - `php artisan test:module-base` (runs Base module tests)
+  - PowerShell: `.\modules\Base\tests\run-module-tests.ps1`
+- **16 tests, 81 assertions** ✅ passing

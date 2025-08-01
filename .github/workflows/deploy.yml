@@ -1,0 +1,236 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+    branches: [main, develop]
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'develop' }}
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: develop
+        
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        
+    - name: Install dependencies
+      run: composer install --no-dev --optimize-autoloader
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Build assets
+      run: |
+        npm ci
+        npm run build
+        
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        rsync -av --exclude-from='.deployignore' . deploy/
+        cd deploy
+        tar -czf ../staging-deploy.tar.gz .
+        
+    - name: Deploy to staging server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        port: ${{ secrets.STAGING_PORT || 22 }}
+        script: |
+          cd /var/www/staging
+          
+          # Backup current deployment
+          if [ -d "current" ]; then
+            cp -r current backup-$(date +%Y%m%d-%H%M%S)
+          fi
+          
+          # Download and extract new deployment
+          wget -O deploy.tar.gz ${{ secrets.STAGING_DEPLOY_URL }}/staging-deploy.tar.gz
+          
+          # Create new release directory
+          mkdir -p releases/$(date +%Y%m%d-%H%M%S)
+          tar -xzf deploy.tar.gz -C releases/$(date +%Y%m%d-%H%M%S)
+          
+          # Update symlink
+          ln -sfn releases/$(date +%Y%m%d-%H%M%S) current
+          
+          # Set permissions
+          chown -R www-data:www-data current
+          chmod -R 755 current/storage
+          
+          # Run deployment commands
+          cd current
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan migrate --force
+          
+          # Restart services
+          sudo systemctl reload php8.2-fpm
+          sudo systemctl reload nginx
+          
+    - name: Run smoke tests
+      run: |
+        sleep 30
+        curl -f ${{ secrets.STAGING_URL }}/health || exit 1
+        echo "Staging deployment successful!"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: main
+        
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.2
+        
+    - name: Install dependencies
+      run: composer install --no-dev --optimize-autoloader
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Build assets
+      run: |
+        npm ci
+        npm run build
+        
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        rsync -av --exclude-from='.deployignore' . deploy/
+        cd deploy
+        tar -czf ../production-deploy.tar.gz .
+        
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT || 22 }}
+        script: |
+          cd /var/www/production
+          
+          # Enable maintenance mode
+          if [ -f "current/artisan" ]; then
+            php current/artisan down --retry=60 --secret="${{ secrets.MAINTENANCE_SECRET }}"
+          fi
+          
+          # Backup current deployment
+          if [ -d "current" ]; then
+            cp -r current backup-$(date +%Y%m%d-%H%M%S)
+            
+            # Keep only last 5 backups
+            ls -1t backup-* | tail -n +6 | xargs -r rm -rf
+          fi
+          
+          # Download and extract new deployment
+          wget -O deploy.tar.gz ${{ secrets.PRODUCTION_DEPLOY_URL }}/production-deploy.tar.gz
+          
+          # Create new release directory
+          mkdir -p releases/$(date +%Y%m%d-%H%M%S)
+          tar -xzf deploy.tar.gz -C releases/$(date +%Y%m%d-%H%M%S)
+          
+          # Update symlink
+          ln -sfn releases/$(date +%Y%m%d-%H%M%S) current
+          
+          # Set permissions
+          chown -R www-data:www-data current
+          chmod -R 755 current/storage
+          
+          # Run deployment commands
+          cd current
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan migrate --force
+          
+          # Clear caches
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+          
+          # Restart services
+          sudo systemctl reload php8.2-fpm
+          sudo systemctl reload nginx
+          
+          # Disable maintenance mode
+          php artisan up
+          
+          # Clean up old releases (keep last 3)
+          cd ../releases
+          ls -1t | tail -n +4 | xargs -r rm -rf
+          
+    - name: Run production smoke tests
+      run: |
+        sleep 30
+        curl -f ${{ secrets.PRODUCTION_URL }}/health || exit 1
+        echo "Production deployment successful!"
+        
+    - name: Notify deployment success
+      if: success()
+      run: |
+        # Add notification logic here (Slack, Discord, email, etc.)
+        echo "Production deployment completed successfully!"
+        
+    - name: Rollback on failure
+      if: failure()
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT || 22 }}
+        script: |
+          cd /var/www/production
+          
+          # Find latest backup
+          latest_backup=$(ls -1t backup-* | head -n 1)
+          
+          if [ -n "$latest_backup" ]; then
+            echo "Rolling back to $latest_backup"
+            
+            # Enable maintenance mode
+            php current/artisan down --retry=60
+            
+            # Restore backup
+            rm -f current
+            ln -s "$latest_backup" current
+            
+            # Restart services
+            sudo systemctl reload php8.2-fpm
+            sudo systemctl reload nginx
+            
+            # Disable maintenance mode
+            php current/artisan up
+            
+            echo "Rollback completed"
+          else
+            echo "No backup found for rollback"
+          fi

@@ -5,32 +5,32 @@ namespace Modules\Base\Contracts;
 interface ServiceInterface
 {
     /**
-     * Get all records
+     * Get all records.
      */
     public function getAll();
 
     /**
-     * Get record by ID
+     * Get record by ID.
      */
     public function getById(string $id);
 
     /**
-     * Create new record
+     * Create new record.
      */
     public function create(array $data);
 
     /**
-     * Update record
+     * Update record.
      */
     public function update(string $id, array $data);
 
     /**
-     * Delete record
+     * Delete record.
      */
     public function delete(string $id): bool;
 
     /**
-     * Get paginated records
+     * Get paginated records.
      */
     public function getPaginated(int $perPage = 15);
 }
