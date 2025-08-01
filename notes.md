@@ -92,11 +92,14 @@ modules/
 - ✅ Removed platform requirement ignores from CI workflows
 - ✅ Composer install works without version conflicts
 - ✅ Security audit and dependency checks working
+- ✅ Fixed MongoDB health check (replaced mongosh with PHP-based)
+- ✅ CI no longer hangs waiting for MongoDB containers
 
 ### Local Development:
 - MongoDB extension: v1.21.0 (matches CI)
 - No need to upgrade local MongoDB extension
 - CI workflows use specific version: `mongodb-1.21.0`
+- Health checks: PHP-based using MongoDB\Driver\Manager
 
 ## PowerShell Commands Fix
 ```powershell
