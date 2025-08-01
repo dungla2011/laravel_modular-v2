@@ -45,13 +45,14 @@ class BaseApiControllerTest extends TestCase
             }
         };
 
-        $this->assertTrue(method_exists($controller, 'index'));
-        $this->assertTrue(method_exists($controller, 'store'));
-        $this->assertTrue(method_exists($controller, 'show'));
-        $this->assertTrue(method_exists($controller, 'update'));
-        $this->assertTrue(method_exists($controller, 'destroy'));
-        $this->assertTrue(method_exists($controller, 'bulkDestroy'));
-        $this->assertTrue(method_exists($controller, 'toggleStatus'));
+        // Test methods exist by checking if they're callable
+        $this->assertTrue(is_callable([$controller, 'index']));
+        $this->assertTrue(is_callable([$controller, 'store'])); 
+        $this->assertTrue(is_callable([$controller, 'show']));
+        $this->assertTrue(is_callable([$controller, 'update']));
+        $this->assertTrue(is_callable([$controller, 'destroy']));
+        $this->assertTrue(is_callable([$controller, 'bulkDestroy']));
+        $this->assertTrue(is_callable([$controller, 'toggleStatus']));
     }
 
     /**

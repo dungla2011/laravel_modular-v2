@@ -4,7 +4,7 @@ parameters:
         - app
         - modules
     excludePaths:
-        - modules/*/Tests/*
+        - modules/*/tests/*
         - vendor
         - bootstrap/cache
         - storage
