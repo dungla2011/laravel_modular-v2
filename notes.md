@@ -88,8 +88,8 @@ modules/
 ### CI Simplified:
 - ✅ Only PHPUnit testing (removed code quality, security, deployment)
 - ✅ MongoDB extension v1.21.0 configured
-- ✅ PHP 8.2/8.3 matrix testing
-- ✅ Parallel test execution
+- ✅ PHP 8.3 testing (user updated from 8.2/8.3 matrix)
+- ✅ Sequential test execution (removed --parallel to avoid paratest dependency)
 - ✅ Minimal dependencies, faster execution
 
 ### CI/CD Issues Fixed:
@@ -97,6 +97,7 @@ modules/
 - ✅ Removed unnecessary jobs (code-style, static-analysis, security-audit, deployment)
 - ✅ MongoDB extension working properly
 - ✅ Fast and reliable CI execution
+- ✅ Fixed paratest requirement issue (removed --parallel from CI)
 
 ### Local Development:
 - MongoDB extension: v1.21.0 (matches CI)

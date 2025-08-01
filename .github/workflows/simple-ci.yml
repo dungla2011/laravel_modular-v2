@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Simple CI
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        php-version: [8.3]
+        php-version: [8.2, 8.3]
         
     steps:
     - uses: actions/checkout@v4
@@ -66,4 +66,4 @@ jobs:
         echo "QUEUE_CONNECTION=sync" >> .env
 
     - name: Run PHPUnit Tests
-      run: php artisan test
+      run: php artisan test --parallel
