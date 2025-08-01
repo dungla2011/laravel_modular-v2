@@ -17,7 +17,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        tools: composer
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        tools: composer:v2
         
     - name: Cache Composer packages
       uses: actions/cache@v3
@@ -26,7 +27,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Run Laravel Pint (Code Style)
       run: |
@@ -53,7 +54,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        tools: composer
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        tools: composer:v2
         
     - name: Cache Composer packages
       uses: actions/cache@v3
@@ -62,7 +64,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Setup PHPStan config
       run: |
@@ -106,7 +108,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        extensions: mongodb
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        tools: composer:v2
         
     - name: Cache Composer packages
       uses: actions/cache@v3
@@ -115,7 +118,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Copy environment file
       run: cp .env.example .env

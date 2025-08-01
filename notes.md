@@ -47,7 +47,7 @@ modules/
 │   ├── Services/          # Business logic
 │   ├── Routes/            # web.php, admin.php, api.php
 │   ├── Views/             # Blade templates
-│   ├── Tests/             # Unit, Feature, Browser tests
+│   ├── tests/             # Unit, Feature, Browser tests
 │   └── Database/          # Migrations, Seeders, Factories
 ```
 
@@ -77,3 +77,20 @@ modules/
   - `php artisan test:module-base` (runs Base module tests)
   - PowerShell: `.\modules\Base\tests\run-module-tests.ps1`
 - **16 tests, 81 assertions** ✅ passing
+
+## CI/CD Pipeline
+- **GitHub Actions**: 3 workflows (CI, Code Quality, Deploy)
+- **Docker**: Multi-stage builds for dev/prod environments
+- **Code Quality**: Laravel Pint + PHPStan automated checks
+- **Health Monitoring**: Comprehensive endpoints for production
+- **MongoDB Extension**: Fixed installation in GitHub Actions runners
+- **Testing**: PHP 8.2/8.3 matrix with MongoDB service container
+
+## PowerShell Commands Fix
+```powershell
+# ❌ KHÔNG hoạt động
+curl -s http://127.0.0.1:8000/health | ConvertFrom-Json | ConvertTo-Json -Depth 3
+
+# ✅ Sử dụng lệnh này
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/health" | ConvertTo-Json -Depth 3
+```

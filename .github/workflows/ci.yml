@@ -32,8 +32,14 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-version }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, iconv, json, mbstring, mongodb
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
         coverage: xdebug
+        tools: composer:v2
+        
+    - name: Verify MongoDB extension
+      run: |
+        php -m | grep mongodb
+        php --ri mongodb
         
     - name: Cache Composer packages
       id: composer-cache
@@ -46,7 +52,12 @@ jobs:
 
     - name: Install dependencies
       run: |
-        composer install --prefer-dist --no-progress --no-interaction
+        composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+        
+    - name: Verify Laravel MongoDB package
+      run: |
+        composer show mongodb/laravel-mongodb
+        php artisan --version
         
     - name: Copy environment file
       run: cp .env.example .env
