@@ -85,6 +85,18 @@ modules/
 - **Health Monitoring**: Comprehensive endpoints for production
 - **MongoDB Extension**: Fixed installation in GitHub Actions runners
 - **Testing**: PHP 8.2/8.3 matrix with MongoDB service container
+- **Platform Requirements**: MongoDB extension version synced (v1.21.0) between local and CI
+
+### CI/CD Issues Fixed:
+- ✅ MongoDB extension version synced at v1.21.0 (local and CI)
+- ✅ Removed platform requirement ignores from CI workflows
+- ✅ Composer install works without version conflicts
+- ✅ Security audit and dependency checks working
+
+### Local Development:
+- MongoDB extension: v1.21.0 (matches CI)
+- No need to upgrade local MongoDB extension
+- CI workflows use specific version: `mongodb-1.21.0`
 
 ## PowerShell Commands Fix
 ```powershell

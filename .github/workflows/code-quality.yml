@@ -17,7 +17,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb-1.21.0
         tools: composer:v2
         
     - name: Cache Composer packages
@@ -27,7 +27,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --ignore-platform-req=ext-mongodb
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Run Laravel Pint (Code Style)
       run: |
@@ -54,7 +54,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb-1.21.0
         tools: composer:v2
         
     - name: Cache Composer packages
@@ -64,7 +64,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --ignore-platform-req=ext-mongodb
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Setup PHPStan config
       run: |
@@ -108,7 +108,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: 8.2
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, dom, filter, gd, json, mongodb-1.21.0
         tools: composer:v2
         
     - name: Cache Composer packages
@@ -118,7 +118,7 @@ jobs:
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --ignore-platform-req=ext-mongodb
+      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
       
     - name: Copy environment file
       run: cp .env.example .env
@@ -169,7 +169,7 @@ jobs:
         php-version: 8.2
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction --ignore-platform-req=ext-mongodb
+      run: composer install --prefer-dist --no-progress --no-interaction
       
     - name: Check for outdated packages
       run: composer outdated --direct
