@@ -15,11 +15,6 @@ jobs:
         image: mongo:7.0
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     strategy:
       matrix:
@@ -40,6 +35,13 @@ jobs:
       run: |
         php -m | grep mongodb
         php --ri mongodb
+        
+    - name: Wait for MongoDB
+      run: |
+        until php -r "try { \$m = new MongoDB\Driver\Manager('mongodb://localhost:27017'); \$m->executeCommand('admin', new MongoDB\Driver\Command(['ping' => 1])); echo 'MongoDB is ready'; } catch (Exception \$e) { echo 'Waiting for MongoDB...'; exit(1); }"; do
+          echo "MongoDB not ready yet, waiting..."
+          sleep 2
+        done
         
     - name: Cache Composer packages
       id: composer-cache
